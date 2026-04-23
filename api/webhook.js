@@ -2,16 +2,20 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req) {
+export default async function handler(req, ctx) {
   const body = await req.text();
+  const contentType = req.headers.get("content-type") || "application/json";
 
   const zohoUrl = "https://www.zohoapis.ca/crm/v7/functions/cn_formhandler/actions/execute?auth_type=apikey&zapikey=1003.00431a6979bf1c4b073fb83d0fdbfd94.0143a22fdd83749de36843fb346fce5a";
 
-  fetch(zohoUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: body,
-  });
+  // waitUntil keeps the fetch alive after we return 200
+  ctx.waitUntil(
+    fetch(zohoUrl, {
+      method: "POST",
+      headers: { "Content-Type": contentType },
+      body: body,
+    })
+  );
 
   return new Response(JSON.stringify({ status: "ok" }), {
     status: 200,
